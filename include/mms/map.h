@@ -1,6 +1,6 @@
 // mms -- a memory-mapped storage.
 //
-// See http://wiki.yandex-team.ru/jandekskarty/development/fordevelopers/libs/mms
+// See https://github.com/dprokoptsev/mms/wiki/Library-usage
 // for short instruction about its usage.
 
 #pragma once
