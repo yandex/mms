@@ -16,7 +16,12 @@ test_sources = \
 	mms_transient_test.cpp \
 	mms_vector_test.cpp \
 	mms_version_test.cpp \
-	mms_test_main.cpp
+	mms_test_main.cpp \
+	\
+	align_tools.h \
+	ptr_recursive.h	\
+	test_config.h \
+	tools.h
 
 
 check_PROGRAMS = mms_test_cxx11 mms_test_boost
@@ -36,3 +41,5 @@ else
 TESTS = stub_test.sh
 
 endif
+
+EXTRA_DIST = stub_test.sh

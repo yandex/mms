@@ -54,5 +54,6 @@ AM_CONDITIONAL([ENABLE_UNITTESTS], [\
 AC_CONFIG_FILES([
     Makefile
     tests/Makefile
+    include/Makefile
 ])
 AC_OUTPUT
