@@ -1,7 +1,4 @@
-
 /*
- * impl/config.h -- A couple of guesses about system config
- *
  * Copyright (c) 2011-2014 Dmitry Prokoptsev <dprokoptsev@yandex-team.ru>
  *
  * This file is part of mms, the memory-mapped storage library.
@@ -25,50 +22,18 @@
  * THE SOFTWARE.
  */
 
+
 #pragma once
 
-#if __cplusplus >= 201103L
-
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/c++11.h"
-#    endif
-
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/c++11.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/c++11.h"
-#    endif
-
-#    ifndef MMS_USE_CXX11
-#        include "../features/c++11.h"
-#    endif
-
+#if defined(MMS_TEST_CXX11)
+#   include <mms/features/c++11.h>
+#   include <mms/features/hash/c++11.h>
+#   include <mms/features/type_traits/c++11.h>
+#elif defined(MMS_TEST_BOOST)
+#   include <mms/features/hash/boost.h>
+#   include <mms/features/type_traits/boost.h>
+#   include <mms/features/optional/boost.h>
+#else
+#   include <mms/features/type_traits/intrinsics.h>
 #endif
 
-
-#ifdef BOOST_CONFIG_HPP
-
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_OPTIONAL
-#        include "../features/optional/boost.h"
-#    endif
-
-#endif
-
-
-#ifndef MMS_FEATURES_TYPE_TRAITS
-#   include "../features/type_traits/intrinsics.h"
-#endif

@@ -40,7 +40,10 @@
 #include <set>
 #include <stdexcept>
 #include <algorithm>
-#include <initializer_list>
+
+#ifdef MMS_USE_CXX11
+#   include <initializer_list>
+#endif
 
 namespace mms {
 

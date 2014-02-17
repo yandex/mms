@@ -1,7 +1,4 @@
-
 /*
- * impl/config.h -- A couple of guesses about system config
- *
  * Copyright (c) 2011-2014 Dmitry Prokoptsev <dprokoptsev@yandex-team.ru>
  *
  * This file is part of mms, the memory-mapped storage library.
@@ -25,50 +22,34 @@
  * THE SOFTWARE.
  */
 
+
 #pragma once
 
-#if __cplusplus >= 201103L
+#include <mms/ptr.h>
 
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/c++11.h"
-#    endif
+template<class P>
+struct OuterPtr;
 
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/c++11.h"
-#    endif
+template<class P>
+struct InnerPtr: public mms::Pointee {
+    int x;
+    mms::ptr< P, OuterPtr<P> > outer;
+    InnerPtr(int xx, OuterPtr<P>* p): x(xx), outer(p) {}
 
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/c++11.h"
-#    endif
+    template<class A> void traverseFields(A a) const { a(x)(outer); }
+};
 
-#    ifndef MMS_USE_CXX11
-#        include "../features/c++11.h"
-#    endif
+template<class P>
+struct OuterPtr: public mms::Pointee {
 
-#endif
+    mms::vector< P, mms::shared_ptr< P, InnerPtr<P> > > inners;
+        // unique_ptr<> would be better here, but not on Hardy :(
 
+    explicit OuterPtr(size_t innerCount)
+    {
+        for (size_t i = 0; i != innerCount; ++i)
+            inners.push_back(new InnerPtr<P>(i, this));
+    }
 
-#ifdef BOOST_CONFIG_HPP
-
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_OPTIONAL
-#        include "../features/optional/boost.h"
-#    endif
-
-#endif
-
-
-#ifndef MMS_FEATURES_TYPE_TRAITS
-#   include "../features/type_traits/intrinsics.h"
-#endif
+    template<class A> void traverseFields(A a) const { a(inners); }
+};

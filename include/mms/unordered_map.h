@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include "impl/config.h"
+
 #ifdef MMS_FEATURES_HASH
 
 #include "impl/defs.h"

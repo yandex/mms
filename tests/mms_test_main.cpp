@@ -1,7 +1,4 @@
-
 /*
- * impl/config.h -- A couple of guesses about system config
- *
  * Copyright (c) 2011-2014 Dmitry Prokoptsev <dprokoptsev@yandex-team.ru>
  *
  * This file is part of mms, the memory-mapped storage library.
@@ -25,50 +22,9 @@
  * THE SOFTWARE.
  */
 
-#pragma once
 
-#if __cplusplus >= 201103L
-
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/c++11.h"
-#    endif
-
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/c++11.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/c++11.h"
-#    endif
-
-#    ifndef MMS_USE_CXX11
-#        include "../features/c++11.h"
-#    endif
-
-#endif
-
-
-#ifdef BOOST_CONFIG_HPP
-
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_OPTIONAL
-#        include "../features/optional/boost.h"
-#    endif
-
-#endif
-
-
-#ifndef MMS_FEATURES_TYPE_TRAITS
-#   include "../features/type_traits/intrinsics.h"
-#endif
+#include "test_config.h"
+#define BOOST_TEST_MODULE mms_test
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#include <boost/test/unit_test.hpp>

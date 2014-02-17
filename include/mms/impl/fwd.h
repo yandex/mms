@@ -35,8 +35,6 @@ namespace mms {
 
 class Writer;
 
-template<class P< class K, class V, template<class> class Hash, template<class> class Eq> class unordered_map;
-template<class P< class T, template<class> class Hash, template<class> class Eq> class unordered_set;
 template<class P, class K, class V, template<class> class Cmp = std::less> class map;
 template<class P, class T, template<class> class Cmp = std::less> class set;
 template<class P, class T> class vector;

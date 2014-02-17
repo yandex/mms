@@ -1,6 +1,7 @@
 
 /*
- * impl/config.h -- A couple of guesses about system config
+ * features/shared_ptr/c++11.h -- include this file to utilize C++11 version
+ *                                of shared pointers
  *
  * Copyright (c) 2011-2014 Dmitry Prokoptsev <dprokoptsev@yandex-team.ru>
  *
@@ -27,48 +28,21 @@
 
 #pragma once
 
-#if __cplusplus >= 201103L
-
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/c++11.h"
-#    endif
-
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/c++11.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/c++11.h"
-#    endif
-
-#    ifndef MMS_USE_CXX11
-#        include "../features/c++11.h"
-#    endif
-
+#ifdef MMS_FEATURES_SHARED_PTR
+#    error another shared_ptr have already been used
+#else
+#    define MMS_FEATURES_SHARED_PTR CXX11
 #endif
 
+#include <memory>
 
-#ifdef BOOST_CONFIG_HPP
+namespace mms {
+namespace impl {
 
-#    ifndef MMS_FEATURES_TYPE_TRAITS
-#        include "../features/type_traits/boost.h"
-#    endif
+template<class T>
+struct shared_ptr_base {
+    typedef std::shared_ptr<T> type;
+};
 
-#    ifndef MMS_FEATURES_HASH
-#        include "../features/hash/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_SHARED_PTR
-#        include "../features/shared_ptr/boost.h"
-#    endif
-
-#    ifndef MMS_FEATURES_OPTIONAL
-#        include "../features/optional/boost.h"
-#    endif
-
-#endif
-
-
-#ifndef MMS_FEATURES_TYPE_TRAITS
-#   include "../features/type_traits/intrinsics.h"
-#endif
+} // namespace impl
+} // namespace mms

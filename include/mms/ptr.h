@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include "impl/config.h"
 #include "impl/defs.h"
 #include "impl/container.h"
 #include "writer.h"
@@ -224,8 +225,8 @@ public:
     template<class P, class T> class ptr; \
     \
     template<class T> \
-    class ptr<Standalone, T>: public impl::PtrBase< base<T> > { \
-        typedef impl::PtrBase< base<T> > Base; \
+    class ptr<Standalone, T>: public impl::PtrBase< base > { \
+        typedef impl::PtrBase< base > Base; \
     public: \
         ptr() {} \
         ptr(T* p): Base(p) {} \
@@ -254,14 +255,16 @@ public:
         typedef ptr<Mmapped, T> MmappedType; \
     }
 
-MMS_DEFINE_PTR(ptr, impl::PlainPtr);
+MMS_DEFINE_PTR(ptr, impl::PlainPtr<T>);
 
 #if MMS_USE_CXX11
-MMS_DEFINE_PTR(unique_ptr, std::unique_ptr);
-MMS_DEFINE_PTR(shared_ptr, std::shared_ptr);
+MMS_DEFINE_PTR(unique_ptr, std::unique_ptr<T>);
 #else
-MMS_DEFINE_PTR(auto_ptr, std::auto_ptr);
-// TODO: add support for boost::shared_ptr
+MMS_DEFINE_PTR(auto_ptr, std::auto_ptr<T>);
+#endif
+
+#ifdef MMS_FEATURES_SHARED_PTR
+MMS_DEFINE_PTR(shared_ptr, typename impl::shared_ptr_base<T>::type);
 #endif
 
 #undef MMS_DEFINE_PTR
