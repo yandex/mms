@@ -48,15 +48,17 @@ public:
         :offset_(offset(ptr)) {}
 
     Offset(const Offset& c)
-        :offset_(offset(c.ptr<void>())) {}
+        :offset_(c.isNull() ? 0 : offset(c.ptr<void>())) {}
 
     Offset& operator = (const Offset& c) {
-        offset_ = offset(c.ptr<void>());
+        offset_ = c.isNull() ? 0 : offset(c.ptr<void>());
         return *this;
     }
 
     template<class T>
     const T* ptr() const { return ptr<T>(offset_); }
+
+    bool isNull() const { return offset_ == 0; }
 
 protected:
     ssize_t offset_;
