@@ -71,6 +71,12 @@ struct DuplicateStructWithNewStyleFormatVersion
     DUPLICATE_STRUCT_ENTIRE
 };
 
+template <class P>
+struct DuplicateStructWithEnforceVersion
+{
+    static mms::FormatVersion enforceVersion(mms::Versions&) { return 10000; }
+};
+
 BOOST_AUTO_TEST_CASE(mms_version_test)
 {
     typedef mms::Standalone S;
@@ -108,4 +114,8 @@ BOOST_AUTO_TEST_CASE(mms_version_test)
     BOOST_CHECK_EQUAL((mms::impl::formatVersion<
             mms::shared_ptr<S, OuterPtr<S> > >()),
             10833728818936060638ull);
+
+    BOOST_CHECK_EQUAL((mms::impl::formatVersion<
+            DuplicateStructWithEnforceVersion<S> >()),
+            10000ull);
 }

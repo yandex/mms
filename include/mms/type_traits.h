@@ -138,6 +138,13 @@ struct MmappedType {
 };
 
 template<class T>
+Yes hasEnforceVersion(
+    Check<FormatVersion (*)(Versions&), &MmappedType<T>::type::enforceVersion>*
+);
+template<class T>
+No hasEnforceVersion(...);
+
+template<class T>
 Yes hasFormatVersion(
     Check<FormatVersion (*)(), &MmappedType<T>::type::formatVersion>*
 );

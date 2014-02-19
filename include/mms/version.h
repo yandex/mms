@@ -37,7 +37,12 @@
 namespace mms {
 namespace impl {
 
-template<class TMM, bool HasFormatVersionEx, bool HasFormatVersion, bool HasTraverseFields>
+template<
+    class TMM,
+    bool HasEnforceVersion,
+    bool HasFormatVersionEx,
+    bool HasFormatVersion,
+    bool HasTraverseFields>
 struct FormatVersionHelper;
 
 template<class TSA>
@@ -47,6 +52,7 @@ private:
 public:
     typedef FormatVersionHelper<
         TMM,
+        sizeof(hasEnforceVersion<TMM>(0)) == sizeof(Yes),
         sizeof(hasFormatVersionEx<TMM>(0)) == sizeof(Yes),
         sizeof(hasFormatVersion<TMM>(0)) == sizeof(Yes),
         HasTraverseFields<TMM>::value
@@ -114,33 +120,43 @@ FormatVersion formatVersion()
     return vs.get<T>();
 }
 
+// Case 0. Classes having a 'static FormatVersion enforceVersion(Versions&)'.
+//         Just invoke the function and return its result untouched.
+template<class TMM, bool HasFormatVersionEx, bool HasFormatVersion, bool HasTraverseFields>
+struct FormatVersionHelper<TMM, true, HasFormatVersionEx, HasFormatVersion, HasTraverseFields> {
+    static FormatVersion version(Versions& vs)
+    {
+        return TMM::enforceVersion(vs);
+    }
+};
+
 // Case 1. Classes having a 'static FormatVersion formatVersion(Versions&)'.
 //         Utilize the method to obtain a version modifier and inject
 //         it to the version calculated using cases 3 or 4.
 template<class TMM, bool HasFormatVersion, bool HasTraverseFields>
-struct FormatVersionHelper<TMM, true, HasFormatVersion, HasTraverseFields> {
+struct FormatVersionHelper<TMM, false, true, HasFormatVersion, HasTraverseFields> {
     static FormatVersion version(Versions& vs)
     {
         return vs.combine(TMM::formatVersion(vs),
-            FormatVersionHelper<TMM, false, false, HasTraverseFields>::version(vs));
+            FormatVersionHelper<TMM, false, false, false, HasTraverseFields>::version(vs));
     }
 };
 
 // Case 2. Classes having a 'static FormatVersion formatVersion()'.
 //         Same as above.
 template<class TMM, bool HasTraverseFields>
-struct FormatVersionHelper<TMM, false, true, HasTraverseFields> {
+struct FormatVersionHelper<TMM, false, false, true, HasTraverseFields> {
     static FormatVersion version(Versions& vs)
     {
         return vs.combine(TMM::formatVersion(),
-            FormatVersionHelper<TMM, false, false, HasTraverseFields>::version(vs));
+            FormatVersionHelper<TMM, false, false, false, HasTraverseFields>::version(vs));
     }
 };
 
 // Case 3. Classes not having any formatVersion(), but having traverseFields().
 //         Find out versions of all fields and combine them.
 template<class TMM>
-struct FormatVersionHelper<TMM, false, false, true> {
+struct FormatVersionHelper<TMM, false, false, false, true> {
     class FormatVersionCalculator {
     public:
         FormatVersionCalculator(Versions& vs, FormatVersion& version):
@@ -164,14 +180,14 @@ struct FormatVersionHelper<TMM, false, false, true> {
         FormatVersion version = 0;
         traverseFields(*tmm, ActionFacade<FormatVersionCalculator>(
             FormatVersionCalculator(vs, version)));
-        return vs.combine(version, FormatVersionHelper<TMM, false, false, false>::version(vs));
+        return vs.combine(version, FormatVersionHelper<TMM, false, false, false, false>::version(vs));
     }
 };
 
 // Case 4. Classes not having anything of the above.
 //         Just use the class name and size.
 template<class TMM>
-struct FormatVersionHelper<TMM, false, false, false> {
+struct FormatVersionHelper<TMM, false, false, false, false> {
     static FormatVersion version(Versions& vs)
     {
         if (mms::type_traits::is_trivial<TMM>::value) {
