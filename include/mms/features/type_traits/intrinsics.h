@@ -34,8 +34,6 @@
 #    define MMS_FEATURES_TYPE_TRAITS INTRINSICS
 #endif
 
-#include <type_traits>
-
 namespace mms {
 namespace type_traits {
 
