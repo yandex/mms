@@ -33,6 +33,7 @@
 #include <mms/unordered_set.h>
 #include <mms/string.h>
 #include <mms/cast.h>
+#include <mms/copy.h>
 #include <boost/lexical_cast.hpp>
 
 BOOST_AUTO_TEST_CASE(test_hash_default_default)
@@ -111,6 +112,42 @@ BOOST_AUTO_TEST_CASE(test_hash_set)
     BOOST_REQUIRE_EQUAL(mm.size(), 100);
     BOOST_REQUIRE(mm.find("12") != mm.end());
     BOOST_CHECK(mm.find("nonexistent") == mm.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_hash_map_copy)
+{
+    typedef mms::unordered_map<mms::Standalone, mms::string<mms::Standalone>, int> HashMap;
+
+    HashMap st;
+    st.insert(std::make_pair("0", 10));
+    st.insert(std::make_pair("1", 1));
+
+    std::ostringstream out;
+    mms::write(out, st);
+    std::string buf = out.str();
+    const HashMap::MmappedType& mm = mms::cast<HashMap::MmappedType>(buf.c_str(), buf.size());
+
+    HashMap copied;
+    mms::copy(mm, copied);
+    BOOST_CHECK(copied == st);
+}
+
+BOOST_AUTO_TEST_CASE(test_hash_set_copy)
+{
+    typedef mms::unordered_set<mms::Standalone, mms::string<mms::Standalone> > HashSet;
+
+    HashSet st;
+    st.insert("0");
+    st.insert("1");
+
+    std::ostringstream out;
+    mms::write(out, st);
+    std::string buf = out.str();
+    const HashSet::MmappedType& mm = mms::cast<HashSet::MmappedType>(buf.c_str(), buf.size());
+
+    HashSet copied;
+    mms::copy(mm, copied);
+    BOOST_CHECK(copied == st);
 }
 
 #endif // MMS_FEATURES_HASH

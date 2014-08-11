@@ -32,6 +32,7 @@
 
 #ifdef MMS_FEATURES_HASH
 
+#include "copy.h"
 #include "impl/defs.h"
 #include "impl/hashtable.h"
 #include "type_traits.h"
@@ -73,7 +74,7 @@ public:
     template<class Iter> unordered_set(Iter begin, Iter end): Base(begin, end) {}
     unordered_set(const MmappedType& s): Base(s.begin(), s.end()) {}
     unordered_set& operator = (const unordered_set& s) { Base::operator = (s); return *this; }
-    unordered_set& operator = (const MmappedType& s) { Base::assign(s.begin(), s.end()); return *this; }
+    unordered_set& operator = (const MmappedType& s) { return impl::copyRange<T>(s, *this); }
 
 #if MMS_USE_CXX11
     unordered_set(unordered_set&& s): Base(std::move(s)) {}
