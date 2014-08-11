@@ -34,6 +34,7 @@
 
 #include "impl/defs.h"
 #include "cast.h"
+#include "copy.h"
 #include "impl/hashtable.h"
 #include "type_traits.h"
 #include "version.h"
@@ -94,7 +95,7 @@ public:
     template<class Iter> unordered_map(Iter begin, Iter end): Base(begin, end) {}
     unordered_map(const MmappedType& mm): Base(mm.begin(), mm.end()) {}
     unordered_map& operator = (const unordered_map& mm) { Base::operator = (mm); return *this; }
-    unordered_map& operator = (const MmappedType& mm) { Base::assign(mm.begin(), mm.end()); return *this; }
+    unordered_map& operator = (const MmappedType& mm) { return impl::copyRange< std::pair<K,V> >(mm, *this); }
 
 #if MMS_USE_CXX11
     unordered_map(unordered_map&& m): Base(std::move(m)) {}
