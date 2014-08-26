@@ -177,8 +177,9 @@ inline bool operator ==(const impl::StringRef& a, const impl::StringRef& b)
 inline bool operator !=(const impl::StringRef& a, const impl::StringRef& b)
     { return impl::StringRef::strcmp<std::not_equal_to>(a, b); }
 
-
+#ifdef MMS_FEATURES_HASH
 inline size_t hash_value(const string<Mmapped>& s)
     { return impl::hash_range(s.begin(), s.end()); }
+#endif
 
 } // namespace mms
