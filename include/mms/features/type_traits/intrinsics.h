@@ -37,7 +37,7 @@
 namespace mms {
 namespace type_traits {
 
-template<class T> struct is_trivial { static const bool value == __is_pod(T); };
+template<class T> struct is_trivial { static const bool value = __is_pod(T); };
 template<class B, class D> struct is_base_of { static const bool value = __is_base_of(B, D); };
 
 template<bool C, class T> struct enable_if {};
