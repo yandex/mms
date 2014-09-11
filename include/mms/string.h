@@ -66,6 +66,8 @@ public:
 
     const char* c_str() const { return ptr<char>(); }
     size_t length() const { return size(); }
+    
+    /*implicit*/ operator std::string () const { return std::string(c_str(), length()); }
 
     typedef string<Mmapped> MmappedType;
 
@@ -164,18 +166,30 @@ private:
 // These operators must be in mms:: namespace
 // (neither in mms::impl:: nor in ::)
 // so that the argument-dependent lookup can find those
-inline bool operator < (const impl::StringRef& a, const impl::StringRef& b)
-    { return impl::StringRef::strcmp<std::less>(a, b); }
-inline bool operator > (const impl::StringRef& a, const impl::StringRef& b)
-    { return impl::StringRef::strcmp<std::greater>(a, b); }
-inline bool operator <=(const impl::StringRef& a, const impl::StringRef& b)
-    { return impl::StringRef::strcmp<std::less_equal>(a, b); }
-inline bool operator >=(const impl::StringRef& a, const impl::StringRef& b)
-    { return impl::StringRef::strcmp<std::greater_equal>(a, b); }
-inline bool operator ==(const impl::StringRef& a, const impl::StringRef& b)
-    { return impl::StringRef::strcmp<std::equal_to>(a, b); }
-inline bool operator !=(const impl::StringRef& a, const impl::StringRef& b)
-    { return impl::StringRef::strcmp<std::not_equal_to>(a, b); }
+
+#define MMS_DEFINE_COMPARISON_OPERATORS(LeftType, RightType)               \
+    inline bool operator < (LeftType a, RightType b)                   \
+        { return impl::StringRef::strcmp<std::less>(a, b); }           \
+    inline bool operator > (LeftType a, RightType b)                   \
+        { return impl::StringRef::strcmp<std::greater>(a, b); }        \
+    inline bool operator <= (LeftType a, RightType b)                  \
+        { return impl::StringRef::strcmp<std::less_equal>(a, b); }     \
+    inline bool operator >= (LeftType a, RightType b)                  \
+        { return impl::StringRef::strcmp<std::greater_equal>(a, b); }  \
+    inline bool operator == (LeftType a, RightType b)                  \
+        { return impl::StringRef::strcmp<std::equal_to>(a, b); }       \
+    inline bool operator != (LeftType a, RightType b)                  \
+        { return impl::StringRef::strcmp<std::not_equal_to>(a, b); }   \
+
+
+MMS_DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const mms::string<mms::Mmapped>&)
+MMS_DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const std::string&)
+MMS_DEFINE_COMPARISON_OPERATORS(const std::string&, const mms::string<mms::Mmapped>&)
+MMS_DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const char*)
+MMS_DEFINE_COMPARISON_OPERATORS(const char*, const mms::string<mms::Mmapped>&)
+
+#undef MMS_DEFINE_COMPARISON_OPERATORS
+
 
 #ifdef MMS_FEATURES_HASH
 inline size_t hash_value(const string<Mmapped>& s)
