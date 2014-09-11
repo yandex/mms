@@ -167,7 +167,7 @@ private:
 // (neither in mms::impl:: nor in ::)
 // so that the argument-dependent lookup can find those
 
-#define DEFINE_COMPARISON_OPERATORS(LeftType, RightType)               \
+#define MMS_DEFINE_COMPARISON_OPERATORS(LeftType, RightType)               \
     inline bool operator < (LeftType a, RightType b)                   \
         { return impl::StringRef::strcmp<std::less>(a, b); }           \
     inline bool operator > (LeftType a, RightType b)                   \
@@ -182,13 +182,13 @@ private:
         { return impl::StringRef::strcmp<std::not_equal_to>(a, b); }   \
 
 
-DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const mms::string<mms::Mmapped>&)
-DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const std::string&)
-DEFINE_COMPARISON_OPERATORS(const std::string&, const mms::string<mms::Mmapped>&)
-DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const char*)
-DEFINE_COMPARISON_OPERATORS(const char*, const mms::string<mms::Mmapped>&)
+MMS_DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const mms::string<mms::Mmapped>&)
+MMS_DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const std::string&)
+MMS_DEFINE_COMPARISON_OPERATORS(const std::string&, const mms::string<mms::Mmapped>&)
+MMS_DEFINE_COMPARISON_OPERATORS(const mms::string<mms::Mmapped>&, const char*)
+MMS_DEFINE_COMPARISON_OPERATORS(const char*, const mms::string<mms::Mmapped>&)
 
-#undef DEFINE_COMPARISON_OPERATORS
+#undef MMS_DEFINE_COMPARISON_OPERATORS
 
 
 #ifdef MMS_FEATURES_HASH
