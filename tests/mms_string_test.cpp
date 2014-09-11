@@ -44,6 +44,9 @@ BOOST_AUTO_TEST_CASE( string_test  )
     BOOST_CHECK_EQUAL(mms::string<mms::Mmapped>(), std::string());
     BOOST_CHECK_EQUAL(mms::string<mms::Mmapped>("abc", 3), std::string("abc"));
     BOOST_CHECK_THROW(mms::string<mms::Mmapped>("abc", 1), std::exception);
+
+    BOOST_CHECK_EQUAL(static_cast<std::string>(mms::string<mms::Mmapped>("abc", 3)), "abc");
+    BOOST_CHECK_EQUAL(static_cast<std::string>(mms::string<mms::Mmapped>("a\00c", 3)), std::string("a\00c", 3));
 }
 
 BOOST_AUTO_TEST_CASE( allign_string_test  )
