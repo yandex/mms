@@ -68,19 +68,40 @@ public:
     typedef unordered_set<Mmapped, typename mms::MmappedType<T>::type, Hash, Eq> MmappedType;
 
     unordered_set() {}
-    unordered_set(const Base& s): Base(s) {}
-    unordered_set(const unordered_set& s): Base(s) {}
-
+    unordered_set(const Base& s): Base(s.begin(), s.end()) {}
+    unordered_set(const unordered_set& s): Base(s.begin(), s.end()) {}
+    unordered_set(const MmappedType& s) { impl::copyRange<T>(s, *this); }
     template<class Iter> unordered_set(Iter begin, Iter end): Base(begin, end) {}
-    unordered_set(const MmappedType& s): Base(s.begin(), s.end()) {}
-    unordered_set& operator = (const unordered_set& s) { Base::operator = (s); return *this; }
-    unordered_set& operator = (const MmappedType& s) { return impl::copyRange<T>(s, *this); }
+
+
+    unordered_set& operator = (const Base& s)
+    {
+        if (this != &s) {
+            Base::clear();
+            Base::insert(s.begin(), s.end());
+        }
+        return *this;
+    }
+
+    unordered_set& operator = (const unordered_set& s)
+    {
+        if (this != &s) {
+            Base::clear();
+            Base::insert(s.begin(), s.end());
+        }
+        return *this;
+    }
+
+    unordered_set& operator = (const MmappedType& s)
+    {
+        return impl::copyRange<T>(s, *this);
+    }
 
 #if MMS_USE_CXX11
-    unordered_set(unordered_set&& s): Base(std::move(s)) {}
-    unordered_set(Base&& s): Base(std::move(s)) {}
+    unordered_set(Base&& s) { Base::swap(s); }
+    unordered_set(unordered_set&& s) { Base::swap(s); }
     unordered_set(std::initializer_list<T> l): Base(l) {}
-    unordered_set& operator = (unordered_set&& s) { Base::operator = (std::move(s)); return *this; }
+    unordered_set& operator = (unordered_set&& s) { Base::swap(s); return *this; }
 #endif
 
     template<class Writer>

@@ -89,19 +89,39 @@ public:
     typedef unordered_map<Mmapped, typename MmappedType<K>::type, typename MmappedType<V>::type, Hash, Eq> MmappedType;
 
     unordered_map(): Base() {}
-    unordered_map(const Base& m): Base(m) {}
-    unordered_map(const unordered_map& m): Base(m) {}
-
+    unordered_map(const Base& m): Base(m.begin(), m.end()) {}
+    unordered_map(const unordered_map& m): Base(m.begin(), m.end()) {}
+    unordered_map(const MmappedType& mm) { impl::copyRange< std::pair<K,V> >(mm, *this); }
     template<class Iter> unordered_map(Iter begin, Iter end): Base(begin, end) {}
-    unordered_map(const MmappedType& mm): Base(mm.begin(), mm.end()) {}
-    unordered_map& operator = (const unordered_map& mm) { Base::operator = (mm); return *this; }
-    unordered_map& operator = (const MmappedType& mm) { return impl::copyRange< std::pair<K,V> >(mm, *this); }
+
+    unordered_map& operator = (const Base& mm)
+    {
+        if (this != &mm) {
+            Base::clear();
+            Base::insert(mm.begin(), mm.end());
+        }
+        return *this;
+    }
+
+    unordered_map& operator = (const unordered_map& mm)
+    {
+        if (this != &mm) {
+            Base::clear();
+            Base::insert(mm.begin(), mm.end());
+        }
+        return *this;
+    }
+
+    unordered_map& operator = (const MmappedType& mm)
+    {
+        return impl::copyRange< std::pair<K,V> >(mm, *this);
+    }
 
 #if MMS_USE_CXX11
-    unordered_map(unordered_map&& m): Base(std::move(m)) {}
-    unordered_map(Base&& m): Base(std::move(m)) {}
+    unordered_map(Base&& m) { Base::swap(m); }
+    unordered_map(unordered_map&& m) { Base::swap(m); }
     unordered_map(std::initializer_list<typename Base::value_type> l): Base(l) {}
-    unordered_map& operator = (unordered_map&& mm) { Base::operator = (std::move(mm)); return *this; }
+    unordered_map& operator = (unordered_map&& mm) { Base::swap(mm); return *this; }
 #endif
 
     template<class Writer>
@@ -118,4 +138,3 @@ inline size_t hash_value(const unordered_map<Mmapped, K, V, Hash, Eq>& m)
 } // namespace mms
 
 #endif // MMS_FEATURES_HASH
-
