@@ -114,7 +114,51 @@ BOOST_AUTO_TEST_CASE(test_hash_set)
     BOOST_CHECK(mm.find("nonexistent") == mm.end());
 }
 
-BOOST_AUTO_TEST_CASE(test_hash_map_copy)
+BOOST_AUTO_TEST_CASE(test_hash_map_copy_compatibilty)
+{
+    typedef mms::unordered_map<mms::Standalone, int, int> HashMap;
+    /* Compile time test */
+    HashMap a;
+    HashMap b = a;
+    b = a;
+    BOOST_REQUIRE (true);
+}
+
+BOOST_AUTO_TEST_CASE(test_hash_set_copy_compatibilty)
+{
+    typedef mms::unordered_set<mms::Standalone, int> HashSet;
+    /* Compile time test */
+    HashSet a;
+    HashSet b = a;
+    b = a;
+    BOOST_REQUIRE (true);
+}
+
+#ifdef MMS_USE_CXX11
+
+BOOST_AUTO_TEST_CASE(test_hash_map_move_compatibilty)
+{
+    typedef mms::unordered_map<mms::Standalone, int, int> HashMap;
+    /* Crash test */
+    HashMap a, b;
+    b = std::move(a);
+    b.insert(a.begin(), a.end());
+    BOOST_REQUIRE (true);
+}
+
+BOOST_AUTO_TEST_CASE(test_hash_set_move_compatibilty)
+{
+    typedef mms::unordered_set<mms::Standalone, int> HashSet;
+    /* Crash test */
+    HashSet a, b;
+    b = std::move(a);
+    b.insert(a.begin(), a.end());
+    BOOST_REQUIRE (true);
+}
+
+#endif // MMS_USE_CXX11
+
+BOOST_AUTO_TEST_CASE(test_hash_map_mms_copy)
 {
     typedef mms::unordered_map<mms::Standalone, mms::string<mms::Standalone>, int> HashMap;
 
@@ -132,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_hash_map_copy)
     BOOST_CHECK(copied == st);
 }
 
-BOOST_AUTO_TEST_CASE(test_hash_set_copy)
+BOOST_AUTO_TEST_CASE(test_hash_set_mms_copy)
 {
     typedef mms::unordered_set<mms::Standalone, mms::string<mms::Standalone> > HashSet;
 
