@@ -47,6 +47,10 @@ private:
     typedef bool (optional::*unspecified_bool_type)() const;
 
 public:
+    optional()
+    {
+    }
+
     optional(const optional& c)
         : impl::Offset(c)
     {
