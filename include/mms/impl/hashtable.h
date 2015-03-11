@@ -55,8 +55,8 @@ public:
     size_t bucket_count() const { return buckets_.size() - 1; }
 
     typedef const value_type* const_local_iterator;
-    const_local_iterator begin(size_t bucket) const { return buckets_[bucket].ptr<Value>(); }
-    const_local_iterator end  (size_t bucket) const { return buckets_[bucket+1].ptr<Value>(); }
+    const_local_iterator begin(size_t bucket) const { return buckets_[bucket].template ptr<Value>(); }
+    const_local_iterator end  (size_t bucket) const { return buckets_[bucket+1].template ptr<Value>(); }
 
     typedef const value_type* const_iterator;
     const_iterator begin() const
