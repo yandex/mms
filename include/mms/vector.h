@@ -42,11 +42,11 @@ namespace mms {
 
 namespace vector_impl {
 
-template <bool fastWrite>
+template <bool fastWrite, class T>
 struct WriteSelector;
 
-template <>
-struct WriteSelector<true> {
+template <class T>
+struct WriteSelector<true, T> {
     template <class Writer, class Iterator>
     size_t operator()(Writer& w, Iterator begin, Iterator end) {
         impl::align(w);
@@ -60,11 +60,11 @@ struct WriteSelector<true> {
     }
 };
 
-template <>
-struct WriteSelector<false> {
+template <class T>
+struct WriteSelector<false, T> {
     template <class Writer, class Iterator>
     size_t operator()(Writer& w, Iterator begin, Iterator end) {
-        return impl::writeRange(w, begin, end);
+        return impl::writeRange<T>(w, begin, end);
     }
 };
 
@@ -110,7 +110,7 @@ public:
     {
         return vector_impl::WriteSelector<
                     mms::type_traits::is_trivial<T>::value &&
-                    !mms::type_traits::is_same<T, bool>::value>()(
+                    !mms::type_traits::is_same<T, bool>::value, T>()(
                 w, Base::begin(), Base::end());
     }
 

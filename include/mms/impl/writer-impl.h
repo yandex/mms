@@ -137,18 +137,22 @@ inline size_t write(Writer& w, const T& t, bool writeFormatVersion)
 template<class Writer, class T>
 inline size_t write(Writer& w, const T& t) { return write(w, t, false); }
 
-template<class Writer, class Iter>
+// Needs to know the type the iterator is supposed to dereference to.
+// For example std::vector<bool>::iterator does not dereference to bool.
+template<class T, class Writer, class Iter>
 inline size_t writeRange(Writer& w, Iter begin, Iter end)
 {
     align(w);
     impl::Offsets ofs;
     for (Iter i = begin; i != end; ++i) {
-        impl::writeData(w, *i, impl::OfsPopulateIter(ofs));
+        // Cast itertator dereference to correct type.
+        impl::writeData(w, static_cast<const T&>(*i), impl::OfsPopulateIter(ofs));
     }
     align(w);
     size_t fieldsPos = w.pos();
     for (Iter i = begin; i != end; ++i) {
-        impl::writeField(w, *i, impl::OfsConsumeIter(ofs));
+        // Cast itertator dereference to correct type.
+        impl::writeField(w, static_cast<const T&>(*i), impl::OfsConsumeIter(ofs));
     }
     return fieldsPos;
 }
