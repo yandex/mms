@@ -91,7 +91,7 @@ public:
     template<class Writer>
     size_t writeData(Writer& w) const
     {
-        return impl::writeRange(w, Base::begin(), Base::end());
+        return impl::writeRange<typename Base::value_type>(w, Base::begin(), Base::end());
     }
 
     template<class Writer>

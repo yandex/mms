@@ -44,7 +44,7 @@
 template<class T>
 struct IntCmp: std::binary_function<T, T, bool>
 {
-    bool operator()(const T& lhs, const T& rhs)
+    bool operator()(const T& lhs, const T& rhs) const
     {
         return boost::lexical_cast<int>(lhs.c_str() + 1)
             < boost::lexical_cast<int>(rhs.c_str() + 1);
