@@ -97,6 +97,10 @@ public:
     template<class Writer, class Container>
     static size_t writeData(Writer& w, const Container& c)
     {
+        if (c.empty()) {
+            return w.pos();
+        }
+
         const size_t bucketCount = c.bucket_count();
         std::vector<size_t> bucketSizes(bucketCount, 0);
 
@@ -161,7 +165,7 @@ public:
     template<class Writer, class Container>
     static size_t writeField(Writer& w, const Container& c, size_t dataPos)
     {
-        return writeRef(w, dataPos, c.bucket_count() + 1);
+        return writeRef(w, dataPos, c.empty() ? 0 : c.bucket_count() + 1);
     }
 
     size_t parasiteLoad() const {
