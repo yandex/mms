@@ -35,6 +35,7 @@
 #include <functional>
 #include <cstdlib>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace mms {
@@ -95,28 +96,40 @@ public:
     template<class Writer, class Container>
     static size_t writeData(Writer& w, const Container& c)
     {
-        size_t bktCount = c.bucket_count();
-        Offsets ofs;
-        for (size_t bkt = 0; bkt != bktCount; ++bkt)
-            for (typename Container::const_local_iterator i = c.begin(bkt), ie = c.end(bkt); i != ie; ++i) {
-                if (hashVal(*i) % bktCount != bkt)
-                    throw std::logic_error("Bucket index mismatch while building mms::hashtable");
-                impl::writeData(w, *i, OfsPopulateIter(ofs));
-            }
+        typedef typename std::vector<
+            std::vector<
+                typename Container::value_type> >::const_iterator BucketsIterator;
+        typedef typename std::vector<
+                typename Container::value_type>::const_iterator BucketIterator;
+        std::vector<std::vector<typename Container::value_type> > buckets(c.bucket_count());
 
-        std::vector<size_t> buckets;
-        align(w);
-        for (size_t bkt = 0; bkt != bktCount; ++bkt) {
-            buckets.push_back(w.pos());
-            for (typename Container::const_local_iterator i = c.begin(bkt), ie = c.end(bkt); i != ie; ++i)
-                impl::writeField(w, *i, OfsConsumeIter(ofs));
+        for (typename Container::const_iterator i = c.begin(), ie = c.end(); i != ie; ++i) {
+            buckets[hashVal(*i) % buckets.size()].push_back(*i);
         }
-        buckets.push_back(w.pos());
+
+        Offsets ofs;
+        for (BucketsIterator i = buckets.begin(), ie = buckets.end(); i != ie; ++i) {
+            for (BucketIterator j = i->begin(), je = i->end(); j != je; ++j)
+                impl::writeData(w, *j, OfsPopulateIter(ofs));
+        }
+
+        std::vector<size_t> bucketOffsets;
+        bucketOffsets.reserve(buckets.size());
+
+        align(w);
+
+        for (BucketsIterator i = buckets.begin(), ie = buckets.end(); i != ie; ++i) {
+            bucketOffsets.push_back(w.pos());
+            for (BucketIterator j = i->begin(), je = i->end(); j != je; ++j)
+                impl::writeField(w, *j, OfsConsumeIter(ofs));
+        }
+        bucketOffsets.push_back(w.pos());
         align(w);
 
         size_t pos = w.pos();
-        for (std::vector<size_t>::iterator i = buckets.begin(), ie = buckets.end(); i != ie; ++i)
-            writeOffset(w, *i);
+        for (size_t i = 0, ie = bucketOffsets.size(); i != ie; ++i) {
+            writeOffset(w, bucketOffsets[i]);
+        }
         return pos;
     }
 
