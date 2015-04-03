@@ -34,6 +34,7 @@
 
 #include <functional>
 #include <cstdlib>
+#include <numeric>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -53,7 +54,7 @@ public:
     typedef Key key_type;
     typedef Value value_type;
 
-    size_t bucket_count() const { return buckets_.size() - 1; }
+    size_t bucket_count() const { return buckets_.empty() ? 0 : buckets_.size() - 1; }
 
     typedef const value_type* const_local_iterator;
     const_local_iterator begin(size_t bucket) const { return buckets_[bucket].template ptr<Value>(); }
@@ -96,36 +97,64 @@ public:
     template<class Writer, class Container>
     static size_t writeData(Writer& w, const Container& c)
     {
-        typedef typename std::vector<
-            std::vector<
-                typename Container::value_type> >::const_iterator BucketsIterator;
-        typedef typename std::vector<
-                typename Container::value_type>::const_iterator BucketIterator;
-        std::vector<std::vector<typename Container::value_type> > buckets(c.bucket_count());
+        if (c.empty()) {
+            return w.pos();
+        }
+
+        const size_t bucketCount = c.bucket_count();
+        std::vector<size_t> bucketSizes(bucketCount, 0);
+
+        // Compute sizes of buckets.
+        for (typename Container::const_iterator i = c.begin(), ie = c.end(); i != ie; ++i) {
+            ++bucketSizes[hashVal(*i) % bucketCount];
+        }
+
+        // Compute starting position of each bucket.
+        std::vector<size_t> bucketPositions(bucketCount);
+        bucketPositions[0] = 0;
+        std::partial_sum(
+                bucketSizes.begin(), --bucketSizes.end(), ++bucketPositions.begin());
+
+        // Store pointers to items in grouped by buckets.
+        std::vector<const typename Container::value_type *> items(c.size(), 0);
 
         for (typename Container::const_iterator i = c.begin(), ie = c.end(); i != ie; ++i) {
-            buckets[hashVal(*i) % buckets.size()].push_back(*i);
+            items[bucketPositions[hashVal(*i) % bucketCount]++] = &*i;
         }
 
         Offsets ofs;
-        for (BucketsIterator i = buckets.begin(), ie = buckets.end(); i != ie; ++i) {
-            for (BucketIterator j = i->begin(), je = i->end(); j != je; ++j)
-                impl::writeData(w, *j, OfsPopulateIter(ofs));
+
+        // Write data for items.
+        for (size_t i = 0, ie = items.size(); i != ie; ++i) {
+            impl::writeData(w, *items[i], OfsPopulateIter(ofs));
         }
 
+        // Reset bucket positions and add a guard at the end.
+        bucketPositions[0] = 0;
+        std::partial_sum(
+                bucketSizes.begin(), --bucketSizes.end(), ++bucketPositions.begin());
+        bucketPositions.push_back(c.size());
+
+        // Write fields for items and store offsets at the beginnin of each bucket.
         std::vector<size_t> bucketOffsets;
-        bucketOffsets.reserve(buckets.size());
+        bucketOffsets.reserve(bucketCount + 1);
 
         align(w);
 
-        for (BucketsIterator i = buckets.begin(), ie = buckets.end(); i != ie; ++i) {
-            bucketOffsets.push_back(w.pos());
-            for (BucketIterator j = i->begin(), je = i->end(); j != je; ++j)
-                impl::writeField(w, *j, OfsConsumeIter(ofs));
+        for (size_t i = 0, ie = items.size(), bucket = 0; i != ie; ++i) {
+            while (i == bucketPositions[bucket]) {
+                bucketOffsets.push_back(w.pos());
+                ++bucket;
+            }
+            impl::writeField(w, *items[i], OfsConsumeIter(ofs));
         }
-        bucketOffsets.push_back(w.pos());
+        // Write offsets for empty buckets at the end.
+        while (bucketOffsets.size() != bucketCount + 1) {
+            bucketOffsets.push_back(w.pos());
+        }
         align(w);
 
+        // Write offsets of buckets
         size_t pos = w.pos();
         for (size_t i = 0, ie = bucketOffsets.size(); i != ie; ++i) {
             writeOffset(w, bucketOffsets[i]);
@@ -136,7 +165,7 @@ public:
     template<class Writer, class Container>
     static size_t writeField(Writer& w, const Container& c, size_t dataPos)
     {
-        return writeRef(w, dataPos, c.bucket_count() + 1);
+        return writeRef(w, dataPos, c.empty() ? 0 : c.bucket_count() + 1);
     }
 
     size_t parasiteLoad() const {
