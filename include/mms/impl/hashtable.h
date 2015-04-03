@@ -54,7 +54,7 @@ public:
     typedef Key key_type;
     typedef Value value_type;
 
-    size_t bucket_count() const { return buckets_.size() - 1; }
+    size_t bucket_count() const { return buckets_.empty() ? 0 : buckets_.size() - 1; }
 
     typedef const value_type* const_local_iterator;
     const_local_iterator begin(size_t bucket) const { return buckets_[bucket].template ptr<Value>(); }
