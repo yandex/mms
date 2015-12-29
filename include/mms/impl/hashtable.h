@@ -62,9 +62,9 @@ public:
 
     typedef const value_type* const_iterator;
     const_iterator begin() const
-        { return buckets_.size() ? begin(0) : nullIterator(); }
+        { return bucket_count() ? begin(0) : nullIterator(); }
     const_iterator end()   const
-        { return buckets_.size() ? end(bucket_count()-1) : nullIterator(); }
+        { return bucket_count() ? end(bucket_count()-1) : nullIterator(); }
 
     // Make stupid BOOST_FOREACH happy
     typedef const value_type* iterator;
@@ -76,7 +76,7 @@ public:
 
     const_iterator find(const Key& k) const
     {
-        if (buckets_.size() == 0)
+        if (bucket_count() == 0)
             return nullIterator();
 
         size_t h = Hash<Key>()(k) % bucket_count();
